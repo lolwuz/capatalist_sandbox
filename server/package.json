@@ -1,0 +1,29 @@
+{
+  "name": "capitalist_server",
+  "version": "0.0.1",
+  "description": "Capitalist Game",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.2.0",
+    "uuid": "^3.3.2"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --exec babel-node index.js"
+  },
+  "repository": "git+https://github.com/lolwuz/capatalist_sandbox.git",
+  "author": "lolwuz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lolwuz/capatalist_sandbox/issues"
+  },
+  "homepage": "https://github.com/lolwuz/capatalist_sandbox#readme",
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/node": "^7.5.5",
+    "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "nodemon": "^1.19.1"
+  }
+}

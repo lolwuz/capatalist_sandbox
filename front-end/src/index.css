@@ -1,0 +1,27 @@
+body {
+  margin: 0;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.square {
+  position: relative;
+  width: 80vh;
+  max-width: 80vh;
+  height: 80vh;
+  margin: auto;
+  margin-top: 30px;
+}
+
+.square:after {
+  content: "";
+  display: block;
+  padding-bottom: 100%;
+}
+
+.content {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
