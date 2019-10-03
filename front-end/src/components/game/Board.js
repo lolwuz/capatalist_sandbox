@@ -125,6 +125,7 @@ function Board() {
   return (
     <motion.div
       className={classes.board}
+      drag
       dragConstraints={{ left: -300, right: 300, top: -300, bottom: 300 }}
     >
       <Paper className="square">
