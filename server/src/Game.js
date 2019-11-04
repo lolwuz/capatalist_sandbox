@@ -4,9 +4,9 @@ export default class Game {
     this.isGameStarted = false;
     this.isGameFinished = false;
     this.currentPlayer = null;
-    this.actions = ['roll']
+    this.actions = ['roll'];
 
-    this.cards = cards;
+    this.cards = this.getCards(cards);
     this.tiles = tiles;
     this.special1 = special1;
     this.special2 = special2;
@@ -20,9 +20,20 @@ export default class Game {
     return ready.length === 0;
   }
 
+  getCards(cards) {
+    cards.forEach(card => {
+      card.owner = null;
+    });
+
+    return cards;
+  }
+
   addPlayer(player, socket) {
     player.id = socket.id;
     player.connected = true;
+    player.position = 0;
+    player.money = 100000;
+    player.cards = [];
     this.players.push(player);
   }
 
@@ -44,12 +55,16 @@ export default class Game {
       });
     }
 
-    return { ...this._getGameInfo(), players: this.players, room: this.room };
+    return {
+      ...this._getGameInfo(),
+      players: this.players,
+      room: this.room
+    };
   }
 
   updateRoll() {
-    const dice1 = Math.random();
-    const dice2 = Math.random();
+    const dice1 = Math.ceil(Math.random() * 6);
+    const dice2 = Math.ceil(Math.random() * 6);
     const total = dice1 + dice2;
 
     const result = this._getDiceResult(total);
@@ -60,17 +75,67 @@ export default class Game {
   }
 
   updateGame(action) {
-    const message = 'action completed'
-    
+    let message = 'action completed';
+
+    // check if action type is allowed
+    if (!this.actions.includes(action.type)) {
+      message = 'action not allowed';
+      return {
+        ...this._getGameInfo(),
+        message
+      };
+    }
+
     switch (action.type) {
       case 'buy':
-        this.currentPlayer.transaction(-100);
+        this.cards.forEach(card => {
+          if (this.currentPlayer.position === card.position) {
+            const balance = this.currentPlayer.money - card.type.money;
+
+            if (balance < 0) {
+              message = 'not enough money';
+              return {
+                ...this._getGameInfo(),
+                message
+              };
+            }
+
+            if (card.owner === this.currentPlayer) {
+              message = 'you already own this card';
+              return {
+                ...this._getGameInfo(),
+                message
+              };
+            }
+
+            this.currentPlayer.money = balance;
+            card.owner = this.currentPlayer;
+            this.actions = this.actions.filter(item => item !== action.type);
+          }
+        });
+
         break;
       default:
         break;
     }
 
-    return { ...this._getGameInfo(), message}
+    return { ...this._getGameInfo(), message };
+  }
+
+  updateTurn() {
+    this.players.forEach(player => {
+      if (player.id === this.currentPlayer.id) {
+        const index = this.players.indexOf(player);
+
+        if (index > this.players.length - 1) {
+          this.currentPlayer = this.players[0];
+        } else {
+          this.currentPlayer = this.players[index + 1];
+        }
+      }
+    });
+
+    return this._getGameInfo();
   }
 
   _getDiceResult(diceTotal) {
@@ -81,13 +146,14 @@ export default class Game {
     // actions can be initiated by the currentPlayer
     // after the dice is rolled.
     const actions = [];
-    if (this.currentPlayer.cards > 0) {
-      actions.append('trade-deal');
-      actions.append('buy-houses'); // TODO: check if can build houses
-      actions.append('mortgage');
+    if (this.currentPlayer.cards.length > 0) {
+      actions.push('trade-deal');
+      actions.push('buy-houses'); // TODO: check if can build houses
+      actions.push('mortgage');
     }
 
     // calculate next position.
+
     let nextPosition = this.currentPlayer.position + diceTotal;
     if (nextPosition > 39) {
       nextPosition -= 39;
@@ -138,6 +204,8 @@ export default class Game {
         }
       }
     });
+
+    return { events, actions };
   }
 
   _executeEvents(events) {
@@ -173,7 +241,13 @@ export default class Game {
 
   _getGameInfo() {
     const { currentPlayer, players, isGameFinished, actions, cards } = this;
-    
-    return { currentPlayer, players, isGameFinished, actions, cards }
+
+    return {
+      currentPlayer,
+      players,
+      isGameFinished,
+      actions,
+      cards
+    };
   }
 }

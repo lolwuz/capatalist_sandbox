@@ -15,6 +15,8 @@ export default url => {
 
         events.forEach(eventName => {
           socket.on(eventName, data => {
+            console.log({ eventName, data });
+
             addSocketEvent(eventName, data);
           });
         });

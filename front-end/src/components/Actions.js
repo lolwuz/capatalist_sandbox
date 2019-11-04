@@ -48,6 +48,7 @@ const Actions = () => {
             aria-label="buy"
             className={classes.fab}
             key="buy"
+            onClick={() => dispatch(sendMessage('move', { type: 'buy' }))}
           >
             buy
           </Fab>

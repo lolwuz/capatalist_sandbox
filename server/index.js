@@ -21,13 +21,15 @@ const getGame = socket => {
     if (clients[i].socket.id === socket.id)
       return { game: clients[i].game, player: clients[i].socket };
   }
+
+  return;
 };
 
 const checkTurn = (game, player) => {
-  const isCurrentPlayer = player === game.currentPlayer;
+  const isCurrentPlayer = player.id === game.currentPlayer.id;
   const isNotStarted = player === null;
 
-  return isCurrentPlayer && isNotStarted;
+  return isCurrentPlayer && !isNotStarted;
 };
 
 /** client connected to the server */
@@ -83,7 +85,7 @@ io.on('connection', socket => {
   socket.on('start', () => {
     const { game } = getGame(socket);
 
-    console.log('start')
+    console.log('start');
 
     if (game.isReady) {
       io.to(game.room).emit('next', game.start());
@@ -103,9 +105,8 @@ io.on('connection', socket => {
   socket.on('roll', () => {
     const { game, player } = getGame(socket);
 
-    console.log('roll')
-
     if (checkTurn(game, player)) {
+      console.log('roll');
       io.to(game.room).emit('roll', game.updateRoll());
     }
   });
@@ -118,14 +119,13 @@ io.on('connection', socket => {
     }
   });
 
-  socket.on('next', data => {
+  socket.on('next', () => {
     const { game, player } = getGame(socket);
 
-    console.log('next')
+    console.log('next');
 
     if (checkTurn(game, player)) {
-      const response = game.nextTurn('next', player, data);
-      io.to(game.room).emit('next', response);
+      io.to(game.room).emit('next', game.updateTurn());
     }
   });
 
