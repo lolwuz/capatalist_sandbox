@@ -82,9 +82,11 @@ const Actions = () => {
     }
   };
 
+  console.log(actions);
+
   return (
     <div className={classes.actionMenu}>
-      {['roll', 'buy', 'cards', 'next'].map(action => getActionButton(action))}
+      {actions.map(action => getActionButton(action))}
     </div>
   );
 };

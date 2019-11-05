@@ -1,23 +1,16 @@
 import AppBar from '@material-ui/core/AppBar';
-import Badge from '@material-ui/core/Badge';
-import IconButton from '@material-ui/core/IconButton';
-import InputBase from '@material-ui/core/InputBase';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import { fade, makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import MailIcon from '@material-ui/icons/Mail';
-import MoreIcon from '@material-ui/icons/MoreVert';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import SearchIcon from '@material-ui/icons/Search';
 import React from 'react';
 import { Link } from '@reach/router';
+import { useSelector } from 'react-redux';
+import { Avatar, Chip } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   appbar: {
-    marginBottom: theme.spacing(0)
+    marginBottom: theme.spacing(0),
+    flexGrow: 1
   },
   title: {
     margin: theme.spacing(1.5, 1, 1.5, 1)
@@ -29,8 +22,9 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function Navigation({ children }) {
+export default function GameNavigation({ children }) {
   const classes = useStyles();
+  const players = useSelector(state => state.game.players);
 
   return (
     <div>
@@ -41,6 +35,15 @@ export default function Navigation({ children }) {
               Capitalist
             </Typography>
           </Link>
+
+          {players.map(player => (
+            <Chip
+              key={player.id}
+              className={classes.title}
+              avatar={<Avatar>{player.username}</Avatar>}
+              label={player.money}
+            />
+          ))}
         </Toolbar>
       </AppBar>
 

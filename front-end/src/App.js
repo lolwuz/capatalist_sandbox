@@ -25,7 +25,6 @@ const App = () => {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Navigation />
 
       <Router>
         <Home path="/" />

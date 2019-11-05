@@ -5,7 +5,8 @@ import {
   Card,
   CardHeader,
   Typography,
-  CardMedia
+  CardMedia,
+  Chip
 } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
@@ -75,6 +76,10 @@ const useStyles = makeStyles(() => ({
     margin: 4,
     fontSize: 10
   },
+  playerTitle: {
+    fontSize: 6,
+    position: 'absolute'
+  },
   media: {
     height: 40
   }
@@ -84,6 +89,8 @@ function Board() {
   const classes = useStyles();
   const dispatch = useDispatch();
   const cards = useSelector(state => state.game.cards);
+  const currentPlayer = useSelector(state => state.game.currentPlayer);
+  const players = useSelector(state => state.game.players);
 
   const getCardPosition = index => {
     if (index < 9) {
@@ -118,6 +125,19 @@ function Board() {
     }
   };
 
+  const getCardPlayers = position => {
+    const returnPlayers = [];
+
+    for (let i = 0; i < players.length; i += 1) {
+      const player = players[i];
+      if (player.position === position) {
+        returnPlayers.push(player);
+      }
+    }
+
+    return returnPlayers;
+  };
+
   const cardClicked = card => {
     dispatch(setPreview(card));
   };
@@ -138,6 +158,7 @@ function Board() {
           {cards.map(card => {
             const style = getCardPosition(card.position);
             const name = getCardClass(card.position);
+            const renderPlayers = getCardPlayers(card.position);
 
             return (
               <Card
@@ -147,11 +168,24 @@ function Board() {
                 className={classes[name]}
                 onMouseEnter={() => cardClicked(card)}
               >
+                {renderPlayers.map(player => (
+                  <Chip
+                    key={player.id}
+                    size="small"
+                    label={player.username}
+                    className={classes.playerTitle}
+                    color={
+                      player.id === currentPlayer.id ? 'secondary' : 'default'
+                    }
+                  />
+                ))}
+
                 <CardMedia
                   className={classes.media}
                   image="https://images2.minutemediacdn.com/image/upload/c_crop,h_1123,w_2000,x_0,y_104/f_auto,q_auto,w_1100/v1554742535/shape/mentalfloss/558576-seangallup-gettyimages-901462836.jpg"
                   title="Contemplative Reptile"
                 />
+
                 <Typography className={classes.cardTitle}>
                   {card.name}
                 </Typography>

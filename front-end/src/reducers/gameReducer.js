@@ -3,6 +3,9 @@ const defaultState = {
   dice1: null,
   dice2: null,
   currentPlayer: null,
+  actions: [],
+  events: [],
+  players: [],
   cards: [
     { position: 0, name: 'Zeeman', type: { name: 'buy', money: 10.0 } },
     { position: 1, name: 'Kist', type: { name: 'buy', money: 2000 } },
@@ -49,15 +52,30 @@ const defaultState = {
 
 function gameReducer(state = defaultState, action) {
   switch (action.type) {
-    case 'roll':
+    case 'roll': {
+      const { dice1, dice2, players, actions, events } = action;
+
       return {
         ...state,
-        dice1: action.dice1,
-        dice2: action.dice2,
-        players: action.players
+        dice1,
+        dice2,
+        players,
+        actions,
+        events
       };
-    case 'move':
-      return { ...state };
+    }
+
+    case 'move': {
+      const { currentPlayer, actions, players, cards } = action;
+
+      return {
+        ...state,
+        currentPlayer,
+        actions,
+        players,
+        cards
+      };
+    }
     case 'next': {
       const { currentPlayer, actions, players, cards } = action;
 

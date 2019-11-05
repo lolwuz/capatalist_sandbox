@@ -127,7 +127,7 @@ export default class Game {
       if (player.id === this.currentPlayer.id) {
         const index = this.players.indexOf(player);
 
-        if (index > this.players.length - 1) {
+        if (index === this.players.length - 1) {
           this.currentPlayer = this.players[0];
         } else {
           this.currentPlayer = this.players[index + 1];
@@ -135,6 +135,7 @@ export default class Game {
       }
     });
 
+    this.actions = ['roll'];
     return this._getGameInfo();
   }
 
@@ -145,7 +146,8 @@ export default class Game {
 
     // actions can be initiated by the currentPlayer
     // after the dice is rolled.
-    const actions = [];
+    const actions = ['next'];
+
     if (this.currentPlayer.cards.length > 0) {
       actions.push('trade-deal');
       actions.push('buy-houses'); // TODO: check if can build houses
@@ -212,13 +214,13 @@ export default class Game {
     events.forEach(event => {
       switch (event.type) {
         case 'start':
-          this.currentPlayer.transaction(this.settings.start);
+          // this.currentPlayer.transaction(this.settings.start);
           break;
         case 'tax1':
-          this.currentPlayer.transaction(-this.settings.tax1);
+          // this.currentPlayer.transaction(-this.settings.tax1);
           break;
         case 'tax2':
-          this.currentPlayer.transaction(-this.settings.tax2);
+          // this.currentPlayer.transaction(-this.settings.tax2);
           break;
         case 'special1':
           // events.append({ type: 'special1', tile });

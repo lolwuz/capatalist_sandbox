@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import Join from '../Join';
 import Create from '../Create';
 import { closeConnection } from '../../actions/socketActions';
+import Navigation from '../Navigation';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -13,17 +14,19 @@ const Home = () => {
   });
 
   return (
-    <Container maxWidth="md">
-      <Grid container spacing={4}>
-        <Grid item md={6}>
-          <Join />
-        </Grid>
+    <Navigation>
+      <Container maxWidth="md">
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Join />
+          </Grid>
 
-        <Grid item md={6}>
-          <Create />
+          <Grid item xs={12} md={6}>
+            <Create />
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </Navigation>
   );
 };
 
