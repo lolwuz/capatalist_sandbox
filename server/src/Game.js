@@ -58,7 +58,8 @@ export default class Game {
     return {
       ...this._getGameInfo(),
       players: this.players,
-      room: this.room
+      room: this.room,
+      id: player.id
     };
   }
 
@@ -123,7 +124,9 @@ export default class Game {
   }
 
   updateTurn() {
-    this.players.forEach(player => {
+    for (let i = 0; i < this.players.length; i += 1) {
+      const player = this.players[i];
+
       if (player.id === this.currentPlayer.id) {
         const index = this.players.indexOf(player);
 
@@ -132,11 +135,12 @@ export default class Game {
         } else {
           this.currentPlayer = this.players[index + 1];
         }
-      }
-    });
 
-    this.actions = ['roll'];
-    return this._getGameInfo();
+        this.actions = ['roll'];
+
+        return this._getGameInfo();
+      }
+    }
   }
 
   _getDiceResult(diceTotal) {

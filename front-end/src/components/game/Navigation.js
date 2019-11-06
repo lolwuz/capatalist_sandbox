@@ -8,6 +8,9 @@ import { useSelector } from 'react-redux';
 import { Avatar, Chip } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
+  fullWidth: {
+    width: '100vw'
+  },
   appbar: {
     marginBottom: theme.spacing(0),
     flexGrow: 1
@@ -47,7 +50,7 @@ export default function GameNavigation({ children }) {
         </Toolbar>
       </AppBar>
 
-      {children}
+      <div className={classes.fullWidth}>{children}</div>
     </div>
   );
 }
