@@ -1,7 +1,17 @@
 import io from 'socket.io-client';
 
 export default url => {
-  const events = ['create', 'join', 'lobby', 'chat', 'roll', 'move', 'next'];
+  const events = [
+    'create',
+    'join',
+    'lobby',
+    'chat',
+    'roll',
+    'move',
+    'next',
+    'build'
+  ];
+
   let socket = null;
 
   return storeAPI => next => action => {

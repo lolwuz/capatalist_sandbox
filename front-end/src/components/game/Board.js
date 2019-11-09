@@ -1,21 +1,13 @@
-import React, { useRef } from 'react';
-import {
-  Paper,
-  makeStyles,
-  Card,
-  CardHeader,
-  Typography,
-  CardMedia,
-  Chip
-} from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { makeStyles, Typography, Chip, Paper } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { setPreview } from '../../actions/uiActions';
 
 const useStyles = makeStyles(() => ({
   boardPaper: {
-    width: 2100,
-    height: 2100,
+    width: 1850,
+    height: 1850,
     backgroundColor: 'darkgreen',
     position: 'absolute',
     left: 0,
@@ -29,7 +21,8 @@ const useStyles = makeStyles(() => ({
     right: 0,
     height: 250,
     width: 250,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    borderRadius: 10
   },
   tile2: {
     position: 'absolute',
@@ -37,7 +30,8 @@ const useStyles = makeStyles(() => ({
     left: 0,
     height: 250,
     width: 250,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    borderRadius: 10
   },
   tile3: {
     position: 'absolute',
@@ -45,7 +39,8 @@ const useStyles = makeStyles(() => ({
     left: 0,
     height: 250,
     width: 250,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    borderRadius: 10
   },
   tile4: {
     position: 'absolute',
@@ -53,32 +48,33 @@ const useStyles = makeStyles(() => ({
     right: 0,
     height: 250,
     width: 250,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
+    borderRadius: 10
   },
   north: {
     position: 'absolute',
     background: 'gray',
-    width: 200,
+    width: 150,
     height: 250,
     transform: 'rotate(-180deg)'
   },
   east: {
     position: 'absolute',
     background: 'darkgray',
-    width: 200,
+    width: 150,
     height: 250,
     transform: 'rotate(-90deg)'
   },
   south: {
     position: 'absolute',
     background: 'gray',
-    width: 200,
+    width: 150,
     height: 250
   },
   west: {
     position: 'absolute',
     background: 'darkgray',
-    width: 200,
+    width: 150,
     height: 250,
     transform: 'rotate(90deg)'
   },
@@ -92,25 +88,30 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-function Board() {
+function Board({ dragRef }) {
   const classes = useStyles();
   const dispatch = useDispatch();
   const cards = useSelector(state => state.game.cards);
   const currentPlayer = useSelector(state => state.game.currentPlayer);
   const players = useSelector(state => state.game.players);
+  const [scroll, setScroll] = useState(0.4);
 
   const getCardPosition = index => {
-    if (index < 9) return { right: 200 * index + 50, bottom: 0 };
-    if (index < 18) return { bottom: 200 * (index - 9) + 25, left: 25 };
-    if (index < 27) return { left: 200 * (index - 18) + 50, top: 0 };
-    if (index < 36) return { top: 200 * (index - 27) + 25, right: 25 };
+    if (index < 10) return { right: 150 * index + 100, bottom: 0 };
+    if (index < 20) return { bottom: 150 * (index - 10) + 50, left: 50 };
+    if (index < 30) return { left: 150 * (index - 20) + 100, top: 0 };
+    if (index < 40) return { top: 150 * (index - 30) + 50, right: 50 };
+
+    return null;
   };
 
   const getCardClass = index => {
-    if (index < 9) return 'south';
-    if (index < 18) return 'west';
-    if (index < 27) return 'north';
-    if (index < 36) return 'east';
+    if (index < 10) return 'south';
+    if (index < 20) return 'west';
+    if (index < 30) return 'north';
+    if (index < 40) return 'east';
+
+    return null;
   };
 
   const getCardPlayers = position => {
@@ -130,19 +131,27 @@ function Board() {
     dispatch(setPreview(card));
   };
 
+  const onScroll = event => {
+    event.preventDefault();
+
+    const newScroll = scroll + event.deltaY / 1000;
+
+    if (newScroll > 0.2 && newScroll < 1.0) setScroll(newScroll);
+  };
+
   return (
     <motion.div
       drag
-      dragConstraints={{ left: -300, right: 300, top: -300, bottom: 300 }}
-      style={{ scale: 0.3 }}
+      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+      style={{ scale: scroll }}
     >
-      <div className={classes.boardPaper}>
+      <Paper className={classes.boardPaper} onWheel={onScroll}>
         <div className={classes.tile1} />
         <div className={classes.tile2} />
         <div className={classes.tile3} />
         <div className={classes.tile4} />
 
-        {cards.map(card => {
+        {/* {cards.map(card => {
           const style = getCardPosition(card.position);
           const name = getCardClass(card.position);
           const renderPlayers = getCardPlayers(card.position);
@@ -176,8 +185,8 @@ function Board() {
               ))}
             </div>
           );
-        })}
-      </div>
+        })} */}
+      </Paper>
     </motion.div>
   );
 }

@@ -9,7 +9,9 @@ import { Avatar, Chip } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   fullWidth: {
-    width: '100vw'
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden'
   },
   appbar: {
     marginBottom: theme.spacing(0),
@@ -30,8 +32,8 @@ export default function GameNavigation({ children }) {
   const players = useSelector(state => state.game.players);
 
   return (
-    <div>
-      <AppBar position="static" className={classes.appbar}>
+    <div style={{ height: '100vh', width: '100vw', backgroundColor: 'purple' }}>
+      <AppBar position="fixed" className={classes.appbar}>
         <Toolbar>
           <Link className={classes.link} to="/">
             <Typography className={classes.title} variant="h6">

@@ -1,3 +1,5 @@
+import { streets } from '../themes';
+
 export default class Game {
   constructor(room, cards, tiles, special1, special2, settings) {
     this.room = room;
@@ -20,14 +22,24 @@ export default class Game {
     return ready.length === 0;
   }
 
+  /**
+   * Set Card owner to null
+   * @param {*} cards
+   */
   getCards(cards) {
     cards.forEach(card => {
       card.owner = null;
+      if (!card.type.special) card.level = 0;
     });
 
     return cards;
   }
 
+  /**
+   * Add player to game.
+   * @param {*} player
+   * @param {*} socket
+   */
   addPlayer(player, socket) {
     player.id = socket.id;
     player.connected = true;
@@ -37,10 +49,17 @@ export default class Game {
     this.players.push(player);
   }
 
+  /**
+   * Removes player from the game
+   * @param {socket} player
+   */
   removePlayer(player) {
     this.players = this.players.filter(p => p.id !== player.id);
   }
 
+  /**
+   * Initialize the game
+   */
   start() {
     const currentPlayer = this.players[0]; // TODO: randomize or something.
     this.currentPlayer = currentPlayer;
@@ -48,6 +67,11 @@ export default class Game {
     return this._getGameInfo();
   }
 
+  /**
+   * Update the lobby
+   * @param {socket} player changing socket
+   * @param {boolean} status
+   */
   updateLobby(player, status) {
     if (player) {
       this.players.forEach(p => {
@@ -63,6 +87,43 @@ export default class Game {
     };
   }
 
+  updateBuild(player, positions) {
+    // check if houses can be placed in this position
+    let cost = 0;
+    let message = '';
+
+    positions.forEach(i => {
+      i.forEach(y => {
+        if (this.cards[y].type.special || this.cards[y].owner.id !== player.id)
+          return null;
+
+        const send = JSON.stringify(y);
+
+        for (let x = 0; x < streets.length; x += 1) {
+          const local = JSON.stringify(streets[x]);
+
+          if (send === local) {
+            streets.forEach(cardIndex => {
+              cost += this.cards[cardIndex].upgrade;
+            });
+          }
+        }
+      });
+    });
+
+    // remove money from player.
+    this.players.forEach(p => {
+      if (player.id === p.id) {
+        p.money -= cost;
+      }
+    });
+
+    return { ...this._getGameInfo(), message };
+  }
+
+  /**
+   * currentPlayer send a roll command.
+   */
   updateRoll() {
     const dice1 = Math.ceil(Math.random() * 6);
     const dice2 = Math.ceil(Math.random() * 6);
@@ -75,6 +136,10 @@ export default class Game {
     return { ...this._getGameInfo(), dice1, dice2 };
   }
 
+  /**
+   * Action is send by currentplayer and processed
+   * @param {*} action
+   */
   updateGame(action) {
     let message = 'action completed';
 
@@ -123,6 +188,9 @@ export default class Game {
     return { ...this._getGameInfo(), message };
   }
 
+  /**
+   * Update the turn
+   */
   updateTurn() {
     for (let i = 0; i < this.players.length; i += 1) {
       const player = this.players[i];
@@ -144,74 +212,59 @@ export default class Game {
   }
 
   _getDiceResult(diceTotal) {
-    // events happen when rolling the dice and
-    // cannot be influenced by the player.
-    const events = [];
+    this.currentPlayer.position = this._calculatePosition(diceTotal);
 
-    // actions can be initiated by the currentPlayer
-    // after the dice is rolled.
-    const actions = ['next'];
-
-    if (this.currentPlayer.cards.length > 0) {
-      actions.push('trade-deal');
-      actions.push('buy-houses'); // TODO: check if can build houses
-      actions.push('mortgage');
-    }
-
-    // calculate next position.
-
-    let nextPosition = this.currentPlayer.position + diceTotal;
-    if (nextPosition > 39) {
-      nextPosition -= 39;
-      events.push({ type: 'start' }); // passed start
-    }
-
-    this.currentPlayer.position = nextPosition;
-
-    // check cards
-    this.cards.forEach(card => {
-      if (card.position === nextPosition) {
-        if (card.owner === null) {
-          actions.push('buy');
-        } else if (card.owner !== this.currentPlayer) {
-          events.push({ type: 'pay', card });
-        }
-      }
-    });
-
-    // check tiles
-    this.tiles.forEach(tile => {
-      if (tile.position === nextPosition) {
-        switch (tile.type) {
-          case 'start':
-            events.push({ type: 'start' });
-            break;
-          case 'tax1':
-            events.push({ type: 'tax1' });
-            break;
-          case 'tax2':
-            events.push({ type: 'tax2' });
-            break;
-          case 'special1':
-            events.push({ type: 'special1', tile });
-            break;
-          case 'special2':
-            events.push({ type: 'special2', tile });
-            break;
-          case 'park':
-            if (this.settings.isParkRule) events.push({ type: 'park' });
-            break;
-          case 'jail':
-            events.push({ type: 'jail' });
-            actions.push({ type: 'jail' });
-            break;
-          default:
-            break;
-        }
-      }
-    });
+    let events = this._getEvents();
+    let actions = this._getActions();
 
     return { events, actions };
+  }
+
+  _getActions() {
+    const { position } = this.currentPlayer;
+    const actions = ['next'];
+
+    this.cards.forEach(card => {
+      if (card.position === position) {
+        if (card.owner === null && card.type.name === 'buy') {
+          actions.push('buy');
+        }
+      }
+    });
+
+    return actions;
+  }
+
+  _getEvents() {
+    const { position } = this.currentPlayer;
+    const events = [];
+
+    // player is on start and will get payed.
+    if (position === 0) {
+      events.push({ type: 'start' });
+    }
+
+    // check all the card for events.
+    this.cards.forEach(card => {
+      if (card.position === position) {
+        if (card.type.name === 'tax')
+          events.push({ type: card.type.name, money: card.type.money });
+        if (card.type.name === 'card')
+          events.push({ type: card.type.name, card: this._getRandomCard() });
+      }
+    });
+
+    return events;
+  }
+
+  _calculatePosition(diceTotal) {
+    let nextPosition = this.currentPlayer.position + diceTotal;
+
+    if (nextPosition > 35) {
+      nextPosition -= 36;
+    }
+
+    return nextPosition;
   }
 
   _executeEvents(events) {
@@ -243,6 +296,12 @@ export default class Game {
           break;
       }
     });
+  }
+
+  _getRandomCard(type) {
+    if (type === 0)
+      return this.special1[Math.floor(Math.random() * this.special1.length)];
+    else return this.special2[Math.floor(Math.random() * this.special2.length)];
   }
 
   _getGameInfo() {
