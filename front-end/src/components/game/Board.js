@@ -9,11 +9,7 @@ const useStyles = makeStyles(() => ({
     width: 1850,
     height: 1850,
     backgroundColor: 'darkgreen',
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    marginLeft: 'auto',
-    marginRight: 'auto'
+    position: 'absolute'
   },
   tile1: {
     position: 'absolute',
@@ -132,8 +128,6 @@ function Board({ dragRef }) {
   };
 
   const onScroll = event => {
-    event.preventDefault();
-
     const newScroll = scroll + event.deltaY / 1000;
 
     if (newScroll > 0.2 && newScroll < 1.0) setScroll(newScroll);
@@ -142,8 +136,8 @@ function Board({ dragRef }) {
   return (
     <motion.div
       drag
-      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       style={{ scale: scroll }}
+      dragConstraints={{ bottom: 400, top: -400, left: -400, right: 200 }}
     >
       <Paper className={classes.boardPaper} onWheel={onScroll}>
         <div className={classes.tile1} />
@@ -151,7 +145,7 @@ function Board({ dragRef }) {
         <div className={classes.tile3} />
         <div className={classes.tile4} />
 
-        {/* {cards.map(card => {
+        {cards.map(card => {
           const style = getCardPosition(card.position);
           const name = getCardClass(card.position);
           const renderPlayers = getCardPlayers(card.position);
@@ -185,7 +179,7 @@ function Board({ dragRef }) {
               ))}
             </div>
           );
-        })} */}
+        })}
       </Paper>
     </motion.div>
   );

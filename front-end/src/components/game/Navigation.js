@@ -32,7 +32,7 @@ export default function GameNavigation({ children }) {
   const players = useSelector(state => state.game.players);
 
   return (
-    <div style={{ height: '100vh', width: '100vw', backgroundColor: 'purple' }}>
+    <div style={{ height: '100vh', width: '100vw' }}>
       <AppBar position="fixed" className={classes.appbar}>
         <Toolbar>
           <Link className={classes.link} to="/">
